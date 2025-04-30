@@ -1,0 +1,21 @@
+app = "tax-reminder-bot"
+primary_region = "ams"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  TELEGRAM_BOT_TOKEN = "your_real_token_here"
+  TELEGRAM_CHAT_ID = "your_real_chat_id_here"
+
+[[services]]
+  internal_port = 8080
+  protocol = "tcp"
+
+  [[services.ports]]
+    handlers = ["http"]
+    port = 80
+
+  [[services.ports]]
+    handlers = ["tls", "http"]
+    port = 443
