@@ -1,19 +1,12 @@
 app = "tax-reminder-bot"
+primary_region = "ams"
+
+[build]
+  image = "python:3.10"
 
 [env]
-  PORT = "8080"
+  BOT_TOKEN = "your_token"
+  CHAT_ID = "your_chat_id"
 
 [experimental]
   auto_rollback = true
-
-[[services]]
-  internal_port = 8080
-  protocol = "tcp"
-
-  [[services.ports]]
-    handlers = ["http"]
-    port = 80
-
-  [[services.ports]]
-    handlers = ["tls", "http"]
-    port = 443
