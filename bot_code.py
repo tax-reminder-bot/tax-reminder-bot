@@ -1,11 +1,16 @@
 import os
-from telegram import Bot
+import time
+import requests
 
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
-if not TOKEN or not CHAT_ID:
-    raise Exception("Missing TELEGRAM_TOKEN or TELEGRAM_CHAT_ID")
+def send_message(text):
+    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
+    data = {"chat_id": CHAT_ID, "text": text}
+    requests.post(url, data=data)
 
-bot = Bot(token=TOKEN)
-bot.send_message(chat_id=CHAT_ID, text="Привіт! Це нагадування від твого бота :)")
+if __name__ == "__main__":
+    while True:
+        send_message("⏰ Нагадування: час подавати податкову звітність!")
+        time.sleep(86400)
