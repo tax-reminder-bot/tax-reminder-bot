@@ -1,42 +1,60 @@
 import os
-import telebot
+import requests
+from bs4 import BeautifulSoup
 import datetime
+import telebot
 
-# Токен твого Telegram-бота
+# Токен Telegram-бота
 TOKEN = '7660525712:AAF7gNF_ybwQ8wh6dY-K8vxjtr0RbnQT57c'
-
-# Ініціалізація бота
 bot = telebot.TeleBot(TOKEN)
-
-# ID твого чату (має бути встановлений через Environment Variable)
 CHAT_ID = os.getenv("CHAT_ID")
 
-# Функція для створення тексту повідомлення
-def generate_message():
-    month_name = datetime.datetime.now().strftime("%B")
-    message = f"""🔔 Нагадування про податки на {month_name} 2025 року:
+# Функція для отримання актуальної мінімальної зарплати
+def get_min_salary():
+    url = 'https://index.minfin.com.ua/ua/labour/salary/min/'
+    response = requests.get(url, timeout=10)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    table = soup.find('table')
+    if not table:
+        return 9100  # fallback
+    rows = table.find_all('tr')
+    for row in rows:
+        cells = row.find_all('td')
+        if len(cells) >= 2 and '2025' in cells[0].text:
+            return int(cells[1].text.replace(' ', '').strip())
+    return 9100  # fallback
+
+# Формування повідомлення
+def generate_message(min_salary):
+    esv = round(min_salary * 0.22)
+    pdfo = round(min_salary * 0.18)
+    vz = round(min_salary * 0.015)
+    total_worker = esv + pdfo + vz
+    message = f"""🔔 Нагадування про податки на {datetime.datetime.now().strftime('%B')} 2025 року:
+
+📌 Мінімальна зарплата: {min_salary} грн
 
 За ФОП 2 групи:
 • Єдиний податок: 1 820 грн
-• ЄСВ: 2 002 грн
-• Військовий збір: (сплачується авансом за квартал)
+• ЄСВ: {esv} грн
 
 За 1 працівника:
-• ПДФО: 1 638 грн
-• ВЗ: 137 грн
-• ЄСВ: 2 002 грн
+• ПДФО: {pdfo} грн
+• ВЗ: {vz} грн
+• ЄСВ: {esv} грн
 
-Разом за працівника: 11 102 грн
+Разом за працівника: {total_worker} грн
 
 🕐 Термін сплати: до 20 числа поточного місяця!"""
     return message
 
-# Основна функція
-if __name__ == "__main__":
+# Основна функція запуску
+if __name__ == '__main__':
     today = datetime.datetime.now()
     if CHAT_ID:
         if today.day == 18:
-            bot.send_message(CHAT_ID, generate_message())
+            min_salary = get_min_salary()
+            bot.send_message(CHAT_ID, generate_message(min_salary))
         else:
             print(f"Сьогодні {today.day}-те число. Повідомлення не надсилається.")
     else:
