@@ -1,19 +1,28 @@
 import os
-import telegram
-from telegram.ext import Updater, CommandHandler
+import time
+import requests
+from flask import Flask
 
-TOKEN = os.environ.get("TELEGRAM_TOKEN")
-CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
+TOKEN = os.getenv("TELEGRAM_TOKEN", "")
+CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
 
-def start(update, context):
-    context.bot.send_message(chat_id=update.effective_chat.id, text="Привіт! Це бот-нагадувач про податки.")
+def send_message(text):
+    if not TOKEN or not CHAT_ID:
+        print("TELEGRAM_TOKEN or TELEGRAM_CHAT_ID not set")
+        return
+    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
+    payload = {"chat_id": CHAT_ID, "text": text}
+    try:
+        requests.post(url, data=payload)
+    except Exception as e:
+        print("Failed to send message:", e)
 
-def main():
-    updater = Updater(token=TOKEN)
-    dispatcher = updater.dispatcher
-    dispatcher.add_handler(CommandHandler("start", start))
-    updater.start_polling()
-    updater.idle()
+app = Flask(__name__)
+
+@app.route("/")
+def index():
+    send_message("Нагадування: cплатити податки 💸")
+    return "OK"
 
 if __name__ == "__main__":
-    main()
+    app.run(host="0.0.0.0", port=8080)
