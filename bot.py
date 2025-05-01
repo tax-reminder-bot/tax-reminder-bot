@@ -1,25 +1,23 @@
-
 import os
+import sys
 import telegram
-from flask import Flask, request
+from flask import Flask
 
 app = Flask(__name__)
-import sys
 
 token = os.environ.get("TELEGRAM_TOKEN")
 chat_id = os.environ.get("TELEGRAM_CHAT_ID")
 
 if not token or not chat_id:
-    print("❌ Секрети TELEGRAM_TOKEN або TELEGRAM_CHAT_ID не встановлені!")
-    sys.exit(1)  # завершити без краху контейнера
+    print("❌ Помилка: TELEGRAM_TOKEN або TELEGRAM_CHAT_ID не передані як секрети Fly.io!")
+    sys.exit(1)
 
 bot = telegram.Bot(token=token)
 
+@app.route("/")
+def index():
+    bot.send_message(chat_id=chat_id, text="✅ Нагадування про податки!")
+    return "OK"
 
-@app.route("/", methods=["POST"])
-def webhook():
-    data = request.get_json()
-    if "message" in data:
-        chat_id = os.environ["TELEGRAM_CHAT_ID"]
-        bot.send_message(chat_id=chat_id, text="Нагадування про податки 🧾")
-    return "ok"
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8080)
