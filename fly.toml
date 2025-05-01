@@ -1,4 +1,3 @@
-
 app = "tax-reminder-bot"
 primary_region = "ams"
 
@@ -8,3 +7,13 @@ primary_region = "ams"
 [env]
   TELEGRAM_TOKEN = ""
   TELEGRAM_CHAT_ID = ""
+
+[[services]]
+  internal_port = 8080
+  protocol = "tcp"
+
+  [[services.ports]]
+    port = 80
+
+  [[services.ports]]
+    port = 443
