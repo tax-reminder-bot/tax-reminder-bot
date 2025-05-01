@@ -4,7 +4,17 @@ import telegram
 from flask import Flask, request
 
 app = Flask(__name__)
-bot = telegram.Bot(token=os.environ["TELEGRAM_TOKEN"])
+import sys
+
+token = os.environ.get("TELEGRAM_TOKEN")
+chat_id = os.environ.get("TELEGRAM_CHAT_ID")
+
+if not token or not chat_id:
+    print("❌ Секрети TELEGRAM_TOKEN або TELEGRAM_CHAT_ID не встановлені!")
+    sys.exit(1)  # завершити без краху контейнера
+
+bot = telegram.Bot(token=token)
+
 
 @app.route("/", methods=["POST"])
 def webhook():
