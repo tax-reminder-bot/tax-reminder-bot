@@ -1,28 +1,15 @@
+
 import os
-import time
-import requests
-from flask import Flask
-
-TOKEN = os.getenv("TELEGRAM_TOKEN", "")
-CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
-
-def send_message(text):
-    if not TOKEN or not CHAT_ID:
-        print("TELEGRAM_TOKEN or TELEGRAM_CHAT_ID not set")
-        return
-    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-    payload = {"chat_id": CHAT_ID, "text": text}
-    try:
-        requests.post(url, data=payload)
-    except Exception as e:
-        print("Failed to send message:", e)
+import telegram
+from flask import Flask, request
 
 app = Flask(__name__)
+bot = telegram.Bot(token=os.environ["TELEGRAM_TOKEN"])
 
-@app.route("/")
-def index():
-    send_message("Нагадування: cплатити податки 💸")
-    return "OK"
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
+@app.route("/", methods=["POST"])
+def webhook():
+    data = request.get_json()
+    if "message" in data:
+        chat_id = os.environ["TELEGRAM_CHAT_ID"]
+        bot.send_message(chat_id=chat_id, text="Нагадування про податки 🧾")
+    return "ok"
