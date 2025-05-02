@@ -1,15 +1,16 @@
 import os
-import sys
 import telegram
-from flask import Flask
-
-app = Flask(__name__)
+import sys
 
 token = os.environ.get("TELEGRAM_TOKEN")
 chat_id = os.environ.get("TELEGRAM_CHAT_ID")
 
-if not token or not chat_id:
-    print("❌ Помилка: TELEGRAM_TOKEN або TELEGRAM_CHAT_ID не передані як секрети Fly.io!")
+if not token:
+    print("❌ TELEGRAM_TOKEN is not set")
+    sys.exit(1)
+
+if not chat_id:
+    print("❌ TELEGRAM_CHAT_ID is not set")
     sys.exit(1)
 
 bot = telegram.Bot(token=token)
